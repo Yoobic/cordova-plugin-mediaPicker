@@ -13,6 +13,26 @@
 
 @end
 
+@interface UIImage(fixOrientation)
+
+- (UIImage *)fixOrientation;
+
+@end
+
+@implementation UIImage (fixOrientation)
+- (UIImage *)fixOrientation {
+    if (self.imageOrientation == UIImageOrientationUp) return self;
+    
+    UIGraphicsBeginImageContextWithOptions(self.size, NO, self.scale);
+    [self drawInRect:(CGRect){0, 0, self.size}];
+    UIImage *normalizedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return normalizedImage;
+}
+@end
+
+
+
 @implementation MediaPicker
 
 - (void)getMedias:(CDVInvokedUrlCommand*)command
@@ -75,8 +95,11 @@
         [self.commandDelegate evalJs:compressCompletedjs];
     };
     [[PHImageManager defaultManager] requestImageDataForAsset:asset  options:options resultHandler:^(NSData * _Nullable imageData, NSString * _Nullable dataUTI, UIImageOrientation orientation, NSDictionary * _Nullable info) {
-        NSString *filename=[asset valueForKey:@"filename"];
-        NSString *fullpath=[NSString stringWithFormat:@"%@/%@%@", dmcPickerPath,[[NSProcessInfo processInfo] globallyUniqueString], filename];
+        UIImage *jpegData = [UIImage imageWithData:imageData];
+        jpegData = [jpegData fixOrientation];
+        imageData = UIImageJPEGRepresentation(jpegData, 1.0);
+        NSString *filename=[NSString stringWithFormat:@"%@%@%@",@"dmcMediaPickerCompress", [self currentTimeStr],@".jpg"];
+        NSString *fullpath=[NSString stringWithFormat:@"%@/%@", dmcPickerPath,filename];
         NSNumber *size=[NSNumber numberWithLong:imageData.length];
 
         NSError *error = nil;
