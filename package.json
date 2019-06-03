@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Yoobic/cordova-plugin-mediaPicker.git"
+    "url": "https://github.com/Yoobic/cordova-plugin-mediaPicker"
   },
   "keywords": [
     "cordova",
