@@ -50,6 +50,15 @@
     }@catch (NSException *exception) {
         NSLog(@"Exception: %@", exception);
     }
+    @try{
+        dmc.maxSelectSize=[[options objectForKey:@"maxSelectSize"]integerValue];
+    }@catch (NSException *exception) {
+        NSLog(@"Exception: %@", exception);
+    }
+    dmc.modalPresentationStyle = 0;
+    if (@available(iOS 13.0, *)) {
+        dmc.modalInPresentation = true;
+    }
     dmc._delegate=self;
     [self.viewController presentViewController:[[UINavigationController alloc]initWithRootViewController:dmc] animated:YES completion:nil];
 }
@@ -102,19 +111,21 @@
         NSString *fullpath=[NSString stringWithFormat:@"%@/%@", dmcPickerPath,filename];
         NSNumber *size=[NSNumber numberWithLong:imageData.length];
 
-        NSError *error = nil;
-        if (![imageData writeToFile:fullpath options:NSAtomicWrite error:&error]) {
-            NSLog(@"%@", [error localizedDescription]);
-            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]] callbackId:callbackId];
-        } else {
-            
-            NSDictionary *dict=[NSDictionary dictionaryWithObjectsAndKeys:fullpath,@"path",[[NSURL fileURLWithPath:fullpath] absoluteString],@"uri",@"image",@"mediaType",size,@"size",[NSNumber numberWithInt:index],@"index", nil];
-            [aListArray addObject:dict];
-            if([aListArray count]==[selectArray count]){
-                [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:aListArray] callbackId:callbackId];
+            NSError *error = nil;
+            if (![imageData writeToFile:fullpath options:NSAtomicWrite error:&error]) {
+                NSLog(@"%@", [error localizedDescription]);
+                [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]] callbackId:callbackId];
+            } else {
+                
+                NSDictionary *dict=[NSDictionary dictionaryWithObjectsAndKeys:fullpath,@"path",[[NSURL fileURLWithPath:fullpath] absoluteString],@"uri",@"image",@"mediaType",size,@"size",[NSNumber numberWithInt:index],@"index", nil];
+                [aListArray addObject:dict];
+                if([aListArray count]==[selectArray count]){
+                    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:aListArray] callbackId:callbackId];
+                }
             }
+        } else {
+            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:NSLocalizedString(@"photo_download_failed", nil)] callbackId:callbackId];
         }
-        
     }];
 }
 
@@ -193,7 +204,8 @@
         [exportSession exportAsynchronouslyWithCompletionHandler:^{
 
             if (exportSession.status == AVAssetExportSessionStatusFailed) {
-               [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"compress failed"] callbackId:callbackId];
+                NSString * errorString = [NSString stringWithFormat:@"videoToSandboxCompress failed %@",exportSession.error];
+               [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:errorString] callbackId:callbackId];
                 NSLog(@"failed");
                 
             } else if(exportSession.status == AVAssetExportSessionStatusCompleted){

@@ -37,7 +37,7 @@ var imgs = document.getElementsByName('imgView');
 var args = {
     'selectMode': 101, //101=picker image and video , 100=image , 102=video
     'maxSelectCount': 40, //default 40 (Optional)
-    'maxSelectSize': 188743680, //188743680=180M (Optional) only android
+    'maxSelectSize': 188743680, //188743680=180M (Optional) 
 };
 
 document.getElementById('openBtn').onclick = function() {
@@ -66,12 +66,12 @@ function loadingUI() {}
 demo.js **upload** and **compress** code:
 ```
 document.getElementById('uploadBtn').onclick = function() {
-    //please:  cordova plugin add cordova-plugin-file-transfer
-    //see:  https://github.com/apache/cordova-plugin-file-transfer
-    //use medias[index].path //upload original img
-
+    //1.please:  cordova plugin add cordova-plugin-file-transfer
+    //2.see:  https://github.com/apache/cordova-plugin-file-transfer
+    
+    //3.use medias[index].path //upload original img
     //OR
-    //compressImage(); //upload compress img
+    //3.compressImage(); //upload compress img
 };
 
 function compressImage() {
@@ -100,12 +100,12 @@ cameraOptions docs: https://cordova.apache.org/docs/en/latest/reference/cordova-
 ```
 //please add : cordova plugin add cordova-plugin-camera
 document.getElementById('takePhotoBtn').onclick = function() {
-    var cameraOptions={ quality: 25,mediaType: Camera.MediaType.PICTURE };//see cordova camera docs
-    MediaPicker.takePhoto(function(media) {
+    var cameraOptions={ quality: 50,mediaType: Camera.MediaType.PICTURE };//see cordova camera docs
+    MediaPicker.takePhoto(cameraOptions,function(media) {
             media.index=0;//index use to imgs[data.index].src; // media.index=resultMedias.length;
             resultMedias.push(media);
             getThumbnail(resultMedias);
-      }, function(e) { console.log(e) }, cameraOptions);
+      }, function(e) { console.log(e) });
 };
 ```    
 
